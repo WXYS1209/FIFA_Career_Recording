@@ -1,9 +1,5 @@
-library(shiny)
-library(readxl)
-library(DT)
-library(shinyWidgets)
-library(shinythemes)
 source("./tabs/UpdateDataTab.R")
+source("./tabs/visualizationTab.R")
 
 ui <- fluidPage(
   theme = shinytheme("cerulean"),
@@ -13,7 +9,8 @@ ui <- fluidPage(
   navbarPage(
     "FIFA Match Data Tracker",
     tabsetPanel(id = "mainTab",
-                updata_data_tab
+                updata_data_tab,
+                visualization_tab
                 
     )
   )

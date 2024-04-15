@@ -2,10 +2,14 @@
 #### Data Table #### 
 record_match_subtab <-
   tabPanel(
-    "Record Match",
+    "Record Data",
     sidebarLayout(
       sidebarPanel(
         fileInput("fileUpload", "Upload Match Record File", accept = c(".csv")),
+        column(6,
+               numericInput("match", "Match", min = 1, step = 1, value = 1)),
+        column(6,
+               textInput("competition", "Competition")),
         pickerInput("player", "Select Player", 
                     choices = NULL,
                     multiple = F,
@@ -21,10 +25,12 @@ record_match_subtab <-
         column(6,
                numericInput("shot_comp", "Shot On Target", min = 0, value = 0)),
         h4("Passing"),
-        column(6,
+        column(4,
                numericInput("pass", "Passes Attempted", min = 0, value = 0)),
-        column(6,
+        column(4,
                numericInput("pass_comp", "Passes Completed", min = 0, value = 0)),
+        column(4,
+               numericInput("key_pass", "Key Passes", min = 0, value = 0)),
         h4("Dribbling"),
         column(6,
                numericInput("dribble", "Dribbles Attempted", min = 0, value = 0)),
@@ -64,7 +70,7 @@ record_match_subtab <-
 
 merge_subtab <-
   tabPanel(
-    "Merge Match",
+    "Merge Data",
     sidebarLayout(
       sidebarPanel(
         fileInput("fileUpload_merge", "Upload Match Record File", accept = c(".csv")),
@@ -77,13 +83,31 @@ merge_subtab <-
     )
   )
 
-
+match_stat_subtab <- 
+  tabPanel(
+    "Match Stat",
+    sidebarLayout(
+      sidebarPanel(
+        fileInput("match_stat_fileIpload", "File Upload",
+                  accept = ".csv"),
+        textInput("opponent", "Against"),
+        numericInput("gf", "Goals For", value = 0, min = 0),
+        numericInput("ga", "Goals Agains", min = 0, value = 0),
+        radioButtons("where", "Home or Away", choices = c("Home", "Away")),
+        actionButton("add_match_stat", "Add Match Stat")
+      ),
+      mainPanel(
+        
+      )
+    )
+  )
 updata_data_tab <- 
   tabPanel("Update Data",
-    tabsetPanel(
-      record_match_subtab,
-      merge_subtab
-    )
+           tabsetPanel(
+             record_match_subtab,
+             merge_subtab,
+             match_stat_subtab
+           )
   )
 
 
