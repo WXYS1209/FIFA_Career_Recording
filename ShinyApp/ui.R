@@ -1,5 +1,6 @@
 source("./tabs/UpdateDataTab.R")
-source("./tabs/visualizationTab.R")
+source("./tabs/RankingTab.R")
+source("./tabs/TransferTab.R")
 
 ui <- fluidPage(
   theme = shinytheme("cerulean"),
@@ -8,10 +9,8 @@ ui <- fluidPage(
   # custom_styles_code,
   navbarPage(
     "FIFA Match Data Tracker",
-    tabsetPanel(id = "mainTab",
-                updata_data_tab,
-                visualization_tab
-                
-    )
+    updata_data_tab,
+    ranking_tab,
+    transfer_tab
   )
 )

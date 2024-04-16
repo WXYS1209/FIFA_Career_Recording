@@ -2,6 +2,8 @@
 
 ```
 data/
+  OverAllSeasons.csv
+  Transfer_Info.csv
   Season1/
     Season_Start.csv
     Overall.csv
@@ -15,5 +17,11 @@ data/
     FA_Cup/
       merged_data_FA.csv
     Other/
-    merged_data_Other.csv
+      merged_data_Other.csv
+      
+ShinyApp/
+
+data_generator.R
+README.md
+.gitignore
 ```
