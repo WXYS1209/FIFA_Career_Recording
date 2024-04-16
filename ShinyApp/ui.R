@@ -1,5 +1,5 @@
 source("./tabs/UpdateDataTab.R")
-source("./tabs/RankingTab.R")
+source("./tabs/OverviewTab.R")
 source("./tabs/TransferTab.R")
 
 ui <- fluidPage(
@@ -10,7 +10,7 @@ ui <- fluidPage(
   navbarPage(
     "FIFA Match Data Tracker",
     updata_data_tab,
-    ranking_tab,
+    overview_tab,
     transfer_tab
   )
 )

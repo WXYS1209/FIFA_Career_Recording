@@ -13,7 +13,10 @@ record_match_subtab <-
         column(6,
                numericInput("match", "Match", min = 1, step = 1, value = 1)),
         column(6,
-               textInput("competition", "Competition")),
+               pickerInput("competition", "Competition",
+                           choices = c("PL", "EC",
+                                       "CC", "FA",
+                                       "Other"))),
         pickerInput("player", "Select Player", 
                     choices = NULL,
                     multiple = F,
@@ -71,11 +74,17 @@ record_match_subtab <-
                  checkboxInput("motm", "Check if MOTM", FALSE)),
           column(6,
                  checkboxInput("starter", "Check if starter", FALSE))),
-        actionButton("add", "Add Match Data"),
-        downloadButton("downloadData", "Download Match Data")
+        fluidRow(
+          column(4,
+                 actionButton("add", "Add Match Data")),
+          column(4,
+                 downloadButton("downloadData", "Download Data")),
+          column(4,
+                 actionButton("record_undo", "Undo"))
+        )
       ),
       mainPanel(
-        DTOutput("updatedData")
+        DTOutput("updatedData_dt")
       )
     )
   )
@@ -115,11 +124,14 @@ match_stat_subtab <-
     "Match Stat",
     sidebarLayout(
       sidebarPanel(
-        fileInput("match_stat_fileUpload", "Upload Match Stat File",
-                  accept = ".csv"),
+        numericInput("match_stat_season", "Season",
+                     value = 1, min = 1, step = 1),
         fluidRow(
           column(6,
-                 textInput("match_stat_comp", "Competition")),
+                 pickerInput("match_stat_comp", "Competition",
+                             choices = c("PL", "EC",
+                                         "CC", "FA",
+                                         "Other"))),
           column(6,
                  textInput("opponent", "Against"))
         ),
@@ -128,14 +140,16 @@ match_stat_subtab <-
         numericInput("possession", "Possession (%)", min = 0, value = 0),
         radioButtons("where", "Home or Away", choices = c("Home", "Away")),
         fluidRow(
-          column(6,
+          column(4,
                  actionButton("add_match_stat", "Add Match Stat")),
-          column(6,
-                 downloadButton("downloadMatchStat", "Download Match Stat"))
+          column(4,
+                 actionButton("updateMatchStat", "Update Match Stat")),
+          column(4,
+                 actionButton("match_stat_undo", "Undo"))
         )
       ),
       mainPanel(
-        DTOutput("updatedMatchStat")
+        DTOutput("updatedMatchStat_dt")
       )
     )
   )

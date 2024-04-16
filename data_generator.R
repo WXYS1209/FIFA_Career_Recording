@@ -3,10 +3,11 @@ if (!dir.exists("./data")) {
 }
 
 setwd("./data")
-
+players = c()
+positions = c()
 df_match <- data.frame(
-  Name = character(),
-  Pos = character(),
+  Name = players,
+  Pos = positions,
   Played = integer(),
   Started = integer(),
   MOTM = integer(),
@@ -55,24 +56,23 @@ write.csv(df_match,
           "OverAllSeasons.csv",
           row.names = F)
 
-for (i in 1:10) {
-  dir.create(paste0("Season", i))
-  write.csv(df_match_stat,
-            paste0("./Season", i,
-                   "/Match_Stat.csv"),
+i = 1
+dir.create(paste0("Season", i))
+write.csv(df_match_stat,
+          paste0("./Season", i,
+                 "/Match_Stat.csv"),
+          row.names = F)
+
+write.csv(df_match,
+          paste0("./Season", i,
+                 "/OverAll.csv"),
+          row.names = F)
+
+for (comp in c("PL", "EC", "CC", "FA", "Other")) {
+  dir.create(paste0("Season", i, "/", comp))
+  write.csv(data_df, 
+            paste0("Season", i, "/", comp, "/",
+                   "merged_data_", comp, ".csv"),
             row.names = F)
-  
-  write.csv(df_match,
-            paste0("./Season", i,
-                   "/OverAll.csv"),
-            row.names = F)
-  
-  for (comp in c("PL", "EC", "CC", "FA", "Other")) {
-    dir.create(paste0("Season", i, "/", comp))
-    write.csv(data_df, 
-              paste0("Season", i, "/", comp, "/",
-                     "merged_data_", comp, ".csv"),
-              row.names = F)
-  }
 }
 

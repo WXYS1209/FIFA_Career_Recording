@@ -1,8 +1,8 @@
-server <- function(input, output, session) {
+server = function(input, output, session) {
   
   #### Record Data ####
-  matchData <- reactiveVal(data.frame()) # Store match data
-  startData <- reactiveVal(data.frame()) # Store Season_Start
+  matchData = reactiveValues(dt = data.frame(), history = list(NULL)) # Store match data
+  startData = reactiveVal(data.frame()) # Store Season_Start
   
   # Read Season_Start.csv for selected season
   observeEvent(input$season, {
@@ -24,10 +24,10 @@ server <- function(input, output, session) {
   
   # Add match data
   observeEvent(input$add, {
-    motm_val <- if (input$motm) 1 else 0
-    started_val <- if (input$starter) 1 else 0
+    motm_val = if (input$motm) 1 else 0
+    started_val = if (input$starter) 1 else 0
     
-    new_data <- data.frame(
+    new_data = data.frame(
       Name = input$player,
       Pos = NA,
       Played = 1,
@@ -50,14 +50,16 @@ server <- function(input, output, session) {
       Rating = as.double(input$rating)
     )
     
-    current_data <- matchData()
-    updated_data <- rbind(current_data, new_data)
-    matchData(updated_data)
+    current_data = matchData$dt
+    updated_data = rbind(current_data, new_data)
+    matchData$history[[length(matchData$history)+1]] = current_data
+    matchData$dt = updated_data
   })
   
   # Display data added
-  output$updatedData <- renderDT({
-    datatable(matchData(),
+  output$updatedData_dt = renderDT({
+    datatable(matchData$dt,
+              editable = T,
               options = list(scrollY = 500,
                              scrollX = 500,
                              deferRender = TRUE,
@@ -65,60 +67,71 @@ server <- function(input, output, session) {
                              autoWidth = T)
     )
   })
-  
+  # Fix
+  observeEvent(input$updatedData_dt_cell_edit, {
+    info = input$updatedData_dt_cell_edit
+    temp = matchData$dt
+    matchData$history[[length(matchData$history)+1]] = temp
+    
+    temp[info$row, info$col] = info$value
+    matchData$dt = temp
+  })
   # Download
-  output$downloadData <- downloadHandler(
+  output$downloadData = downloadHandler(
     filename = function() {
       paste("match_data_", input$competition, "_", 
             input$match, ".csv", sep="")
     },
     content = function(file) {
-      write.csv(matchData(), file, row.names = FALSE)
+      write.csv(matchData$dt, file, row.names = FALSE)
     }
   )
+  # Undo
+  observeEvent(input$record_undo, {
+    if(length(matchData$history) > 1) {
+      matchData$dt = tail(matchData$history, 1)[[1]]
+      matchData$history = matchData$history[-length(matchData$history)]
+    }
+  })
+  
   
   #### Merge Data ####
-  newmatchData <- reactiveVal(data.frame()) # Store uploaded match records
-  aggregatedData <- reactiveVal(data.frame()) # Store aggregated record
+  newmatchData = reactiveVal(data.frame()) # Store uploaded match records
+  aggregatedData = reactiveVal(data.frame()) # Store aggregated record
   
   # Read Match Records
   observeEvent(input$fileUpload_merge, {
-    inFile <- input$fileUpload_merge
+    inFile = input$fileUpload_merge
     if (is.null(inFile)) {
       return(NULL)
     }
     
     # Read all files
-    data_list <- lapply(inFile$datapath, read.csv)
+    data_list = lapply(inFile$datapath, read.csv)
     
     # Merge all files
     if (length(data_list) > 1) {
-      df <- do.call(rbind, data_list)
+      df = do.call(rbind, data_list)
     } else {
-      df <- data_list[[1]]
+      df = data_list[[1]]
     }
     newmatchData(df)
   })
   
   # Read Aggregated Record
-  observeEvent(input$competition_merge, {
-    if (input$competition_merge != "All" &
-        input$season_merge != "All"){
+  observe({
+    if (input$competition_merge != "All" & input$season_merge != "All"){
       file_name = paste0("../data/Season", input$season_merge,
                          "/", input$competition_merge, "/merged_data_",
                          input$competition_merge,
                          ".csv")
+      df = read.csv(file_name)
+      aggregatedData(df)
     }
-    if (input$competition_merge == "All") {
-      file_name = paste0("../data/Season", input$season_merge,
-                         "/OverAll.csv")
+    else {
+      aggregatedData(data.frame())
     }
     
-    if (input$season_merge == "All") {
-      file_name = paste0("../data/OverAllSeasons.csv")
-    }
-    df = read.csv(file_name)
-    aggregatedData(df)
   })
   
   # Merge and update aggregated record
@@ -126,7 +139,7 @@ server <- function(input, output, session) {
     temp_aggr = aggregatedData()
     temp_match = newmatchData()
     
-    df <- temp_aggr %>% 
+    df = temp_aggr %>% 
       rbind(temp_match) %>% 
       group_by(Name) %>% 
       summarise(
@@ -144,7 +157,7 @@ server <- function(input, output, session) {
   })
   
   # Display merged aggregated record
-  output$updatedData_merge_dt <- renderDT({
+  output$updatedData_merge_dt = renderDT({
     datatable(aggregatedData(), 
               options = list(scrollY = 500,
                              scrollX = 500,
@@ -166,7 +179,7 @@ server <- function(input, output, session) {
                 row.names = F
       )
     }
-    if (input$competition_merge == "All") {
+    if (input$competition_merge == "All" & input$season_merge != "All") {
       write.csv(aggregatedData(), 
                 paste0("../data/Season", input$season_merge,
                        "/OverAll.csv"),
@@ -180,7 +193,7 @@ server <- function(input, output, session) {
       )
     }
   })
-  # output$updateData_merge <- downloadHandler(
+  # output$updateData_merge = downloadHandler(
   #   filename = function() {
   #     paste0("merged_data_", input$competition_merge, ".csv")
   #   },
@@ -190,11 +203,15 @@ server <- function(input, output, session) {
   # )
   
   #### Match Stat ####
-  matchstatData = reactiveVal(data.frame())
+  matchstatData = reactiveValues(dt = data.frame(), history = list(NULL))
   
-  observeEvent(input$match_stat_fileUpload, {
-    df = read.csv(input$match_stat_fileUpload$datapath)
-    matchstatData(df)
+  observeEvent(input$match_stat_season, {
+    file_name = paste0("../data/Season",
+                       input$match_stat_season,
+                       "/Match_Stat.csv")
+    df = read.csv(file_name)
+    matchstatData$dt = df
+    # matchstatData$history[[length(matchstatData$history)+1]] = matchstatData$dt
   })
   
   observeEvent(input$add_match_stat, {
@@ -207,15 +224,17 @@ server <- function(input, output, session) {
       Competition = input$match_stat_comp
     ) %>% 
       mutate(WLD = if_else(GF > GA, "W", if_else(GF < GA, "L", "D")))
-    current_data = matchstatData()
+    current_data = matchstatData$dt
+    matchstatData$history[[length(matchstatData$history)+1]] = matchstatData$dt
     updated_data = rbind(current_data, new_data)
-    matchstatData(updated_data)
+    matchstatData$dt = updated_data
   })
   
   # Display data added
-  output$updatedMatchStat <- renderDT({
-    datatable(matchstatData(),
-              rownames = F,
+  output$updatedMatchStat_dt = renderDT({
+    datatable(matchstatData$dt,
+              rownames = T,
+              editable = T,
               options = list(scrollY = 500,
                              scrollX = 500,
                              deferRender = TRUE,
@@ -224,34 +243,103 @@ server <- function(input, output, session) {
     )
   })
   
-  # Download
-  output$downloadMatchStat <- downloadHandler(
-    filename = "Match_Stat.csv",
-    content = function(file) {
-      write.csv(matchstatData(), file, row.names = FALSE)
-    }
-  )
+  # Fix
+  observeEvent(input$updatedMatchStat_dt_cell_edit, {
+    info = input$updatedMatchStat_dt_cell_edit
+    temp = matchstatData$dt
+    matchstatData$history[[length(matchstatData$history)+1]] = temp
+    
+    temp[info$row, info$col] = info$value
+    matchstatData$dt = temp
+  })
   
-  #### Ranking ####
+  # Undo
+  observeEvent(input$match_stat_undo, {
+    if(length(matchstatData$history) > 1) {
+      matchstatData$dt = tail(matchstatData$history, 1)[[1]]
+      matchstatData$history = matchstatData$history[-length(matchstatData$history)]
+    }
+  })
+  
+  # Rewrite
+  observeEvent(input$updateMatchStat, {
+    write.csv(matchstatData$dt, 
+              paste0("../data/Season",
+                     input$match_stat_season,
+                     "/Match_Stat.csv"),
+              row.names = F)
+  })
+  
+  #### Overview ####
   ##### Current Season #####
   season_df = reactiveVal(data.frame())
+  season_match_df = reactiveVal(data.frame())
   
-  observeEvent(input$vis_season, {
-    file_name = paste0("../data/Season",
-                       input$vis_season,
-                       "/OverAll.csv")
-    if (file.exists(file_name)) {
-      df = read.csv(file_name) %>% 
+  observe({
+    if (length(input$vis_comp) == 5){
+      file_name = paste0("../data/Season",
+                         input$vis_season,
+                         "/OverAll.csv")
+      df = read.csv(file_name)  %>% 
         mutate(Shot_Acc = Shot_Comp / Shots,
                Pass_Acc = Pass_Comp / Pass,
                Dribble_Acc = Dribble_Comp / Dribble,
                Tackle_Acc = Tackle_Comp / Tackle,
                Rating = Rating / Played)
     }
-    else{
-      df = NULL
+    else if (length(input$vis_comp) == 0){
+      df = data.frame()
+    } else{
+      file_names = c()
+      for (i in 1:length(input$vis_comp)){
+        file_name = paste0("../data/Season",
+                           input$vis_season,
+                           "/", input$vis_comp[i],
+                           "/merged_data_", input$vis_comp[i],
+                           ".csv")
+        file_names = c(file_names, file_name)
+      }
+      
+      # Read all files
+      data_list = lapply(file_names, read.csv)
+      
+      # Merge all files
+      if (length(data_list) > 1) {
+        df = do.call(rbind, data_list)
+      } else {
+        df = data_list[[1]]
+      }
+      
+      df = df %>% 
+        group_by(Name) %>% 
+        summarise(
+          Pos = Pos[!is.na(Pos)],
+          across(c(Played, Started, MOTM, 
+                   Goals, Assists, Shots, Shot_Comp, 
+                   Pass, Pass_Comp, Key_Pass, 
+                   Dribble, Dribble_Comp, 
+                   Tackle, Tackle_Comp, 
+                   Possession_Won, Possession_Lost, 
+                   Distance, Rating),
+                 ~ sum(.x, na.rm = TRUE))
+        )  %>% 
+        mutate(Shot_Acc = Shot_Comp / Shots,
+               Pass_Acc = Pass_Comp / Pass,
+               Dribble_Acc = Dribble_Comp / Dribble,
+               Tackle_Acc = Tackle_Comp / Tackle,
+               Rating = Rating / Played)
+      
     }
+    
+    file_name_match = paste0("../data/Season",
+                             input$vis_season,
+                             "/Match_Stat.csv")
+
+    
+    df_match = read.csv(file_name_match)
+    
     season_df(df)
+    season_match_df(df_match)
   })
   
   output$vis_radar = renderPlotly({
@@ -292,6 +380,13 @@ server <- function(input, output, session) {
     plot_stat(season_df(), get_variable(input$vis_variable)[2])
   })
   
+  output$vis_match = renderPlot({
+    plot_match_stat(season_match_df(), 
+                    input$vis_comp, 
+                    input$vis_where,
+                    input$vis_goal_type)
+  })
+  
   ##### Overall #####
   # overall_df = reactiveVal(data.frame())
   
@@ -318,6 +413,7 @@ server <- function(input, output, session) {
     datatable(
       df_all_seasons %>% 
         arrange(-Goals) %>% 
+        filter(Goals > 0) %>% 
         select(Name, Pos, Goals),
       rownames = F,
       options = list(
@@ -334,6 +430,7 @@ server <- function(input, output, session) {
     datatable(
       df_all_seasons %>% 
         arrange(-Assists) %>% 
+        filter(Assists > 0) %>% 
         select(Name, Pos, Assists),
       rownames = F,
       options = list(
@@ -350,6 +447,7 @@ server <- function(input, output, session) {
     datatable(
       df_all_seasons %>% 
         arrange(-Played) %>% 
+        filter(Played > 0) %>% 
         select(Name, Pos, Played),
       rownames = F,
       options = list(
@@ -365,7 +463,8 @@ server <- function(input, output, session) {
   output$vis_overall_dt_rating = renderDT({
     datatable(
       df_all_seasons %>% 
-        arrange(-Rating) %>% 
+        arrange(-Rating) %>%
+        filter(Rating > 0) %>% 
         select(Name, Pos, Rating),
       rownames = F,
       options = list(
@@ -382,6 +481,7 @@ server <- function(input, output, session) {
     datatable(
       df_all_seasons %>% 
         arrange(-Tackle_Comp) %>% 
+        filter(Tackle_Comp > 0) %>% 
         select(Name, Pos, Tackle_Comp),
       rownames = F,
       options = list(
