@@ -19,13 +19,14 @@ plot_stat = function(df, variable){
       theme_minimal()
     ggplotly(p)
   }
-
+  
 }
 
-plot_match_stat = function(df, competition, where, type) {
+plot_match_stat = function(df, competition, where) {
   df = df %>% 
     filter(Competition %in% competition,
-           HA %in% where)
+           HA %in% where) %>% 
+    as.data.frame()
   if (dim(df)[1] == 0) {
     p_sc = ggplot(df, aes(x = c(0,1), y = c(0,1))) + 
       annotate("text",x=0.5,y=0.5,
@@ -34,21 +35,26 @@ plot_match_stat = function(df, competition, where, type) {
       theme(plot.caption = element_text(size = 10))
     p_sc
   } else{
-    p1 = df %>%
+    df = df %>%
       mutate(game = 1:dim(df)[1],
-             diff = GF - GA) %>% 
-      pivot_longer(c(GF, GA, diff), names_to = "goal_type") %>% 
-      filter(goal_type %in% type) %>% 
-      ggplot(aes(x = game, y = value,
-                 fill = WLD)) + 
-      geom_col() +
+             diff = abs(GF - GA))
+    dff = df %>% 
+      pivot_longer(c(GF, GA, diff), names_to = "goal_type")
+    # filter(goal_type %in% type) %>% 
+    p1 = ggplot() + 
+      geom_col(data = dff,
+               aes(x = game, y = value, alpha = WLD, fill = goal_type),
+               position = "dodge") +
+      geom_line(data = df,
+                aes(x = game, y = Possession / 10),
+                color = "royalblue") +
+      ylim(0, 10) +
       labs(x = "Game Number",
-           y = "Goals",
-           title = paste0(type, " for ", competition, " in ",
-                          where, " game")) +
+           y = "Goals") +
+      scale_alpha_manual(values = c("W" = 1, "L" = 0.5, "D" = 0.75)) + 
       theme_minimal()
-    # ggplotly(p1)
-    p1
+    ggplotly(p1)
+    # p1
   }
 }
 

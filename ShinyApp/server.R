@@ -1,5 +1,50 @@
 server = function(input, output, session) {
-  
+  # Update Seasons
+  observe({
+    seasons = list.files("../data/")[grepl("^Season", 
+                                           list.files("../data/"))]
+    updatePickerInput(
+      session,
+      "season",
+      choices = gsub("Season", "", seasons),
+      selected = "1"
+      )
+    
+    updatePickerInput(
+      session,
+      "season_merge",
+      choices = c(gsub("Season", "", seasons), "All"),
+      selected = "1"
+    )
+    
+    updatePickerInput(
+      session,
+      "match_stat_season",
+      choices = gsub("Season", "", seasons),
+      selected = "1"
+    )
+    
+    updatePickerInput(
+      session,
+      "vis_season",
+      choices = gsub("Season", "", seasons),
+      selected = "1"
+    )
+    
+    updatePickerInput(
+      session,
+      "transfer_season",
+      choices = gsub("Season", "", seasons),
+      selected = "1"
+    )
+    
+    updatePickerInput(
+      session,
+      "player_season",
+      choices = gsub("Season", "", seasons),
+      selected = "1"
+    )
+  })
   #### Record Data ####
   matchData = reactiveValues(dt = data.frame(), history = list(NULL)) # Store match data
   startData = reactiveVal(data.frame()) # Store Season_Start
@@ -270,8 +315,8 @@ server = function(input, output, session) {
               row.names = F)
   })
   
-  #### Overview ####
-  ##### Current Season #####
+  
+  #### Current Season ####
   season_df = reactiveVal(data.frame())
   season_match_df = reactiveVal(data.frame())
   
@@ -334,7 +379,7 @@ server = function(input, output, session) {
     file_name_match = paste0("../data/Season",
                              input$vis_season,
                              "/Match_Stat.csv")
-
+    
     
     df_match = read.csv(file_name_match)
     
@@ -380,14 +425,13 @@ server = function(input, output, session) {
     plot_stat(season_df(), get_variable(input$vis_variable)[2])
   })
   
-  output$vis_match = renderPlot({
+  output$vis_match = renderPlotly({
     plot_match_stat(season_match_df(), 
                     input$vis_comp, 
-                    input$vis_where,
-                    input$vis_goal_type)
+                    input$vis_where)
   })
   
-  ##### Overall #####
+  #### Overall ####
   # overall_df = reactiveVal(data.frame())
   
   file_name_all = "../data/OverAllSeasons.csv"
@@ -510,4 +554,215 @@ server = function(input, output, session) {
       )
     )
   })
+  
+  #### Transfer #### 
+  transferOverview = reactiveVal(data.frame())
+  file_name_trans = "../data/Transfer_Info.csv"
+  if (file.exists(file_name_trans)) {
+    df_transfer = read.csv(file_name_trans)
+  }
+  else{
+    df_transfer = NULL
+  }
+  transferOverview(df_transfer)
+  
+  transferData = reactiveValues(dt = data.frame(), 
+                                history = list(NULL)) # Store transfer info
+  
+  observeEvent(input$transfer_add, {
+    new_data = data.frame(
+      Name = input$transfer_name,
+      Pos = input$transfer_position,
+      Season = as.integer(input$transfer_season),
+      Window = input$transfer_window,
+      Type = input$transfer_type,
+      Fee = as.numeric(input$transfer_fee)
+    )
+    current_data = transferData$dt
+    updated_data = rbind(current_data, new_data)
+    transferData$history[[length(transferData$history) + 1]] = current_data
+    transferData$dt = updated_data
+  })
+  
+  output$transfer_dt = renderDT({
+    datatable(
+      transferData$dt,
+      editable = T,
+      rownames = T,
+      options = list(
+        scrollY = 300,
+        scrollX = 300,
+        deferRender = TRUE,
+        pageLength = 10,
+        dom = "tip",
+        autoWidth = F
+      )
+    )
+  })
+  
+  # Fix
+  observeEvent(input$transfer_dt_cell_edit, {
+    info = input$transfer_dt_cell_edit
+    temp = transferData$dt
+    transferData$history[[length(transferData$history)+1]] = temp
+    
+    temp[info$row, info$col] = info$value
+    transferData$dt = temp
+  })
+  
+  # Undo
+  observeEvent(input$transfer_undo, {
+    if(length(transferData$history) > 1) {
+      transferData$dt = tail(transferData$history, 1)[[1]]
+      transferData$history = transferData$history[-length(transferData$history)]
+    }
+  })
+  
+  # Rewrite
+  observeEvent(input$updateFile_transfer, {
+    df_transfer = rbind(transferOverview(), transferData$dt)
+    write.csv(df_transfer, 
+              paste0("../data/Transfer_Info.csv"),
+              row.names = F)
+    transferOverview(df_transfer)
+  })
+  
+  output$transfer_overview_dt = renderDT({
+    datatable(
+      transferOverview() %>% arrange(-Season),
+      rownames = F,
+      options = list(
+        scrollY = 300,
+        scrollX = 300,
+        deferRender = TRUE,
+        pageLength = 20,
+        dom = "tip",
+        autoWidth = F
+      )
+    )
+  })
+  #### Transfer Overview ####
+  output$vis_transfer_fee = renderPlotly({
+    df = transferOverview() %>% 
+      filter(Pos %in% input$vis_transfer_position) %>% 
+      group_by(Season, Type) %>% 
+      summarise(Fee_Total = sum(Fee))
+    
+    p = ggplot(df, aes(x = Season, y = Fee_Total)) + 
+      geom_col(aes(fill = Type), position = "dodge") + 
+      theme_minimal() + 
+      labs(y = "Transfer Fee (M)",
+           title = "Transfer Fee in Seasons")
+    
+    ggplotly(p)
+  })
+  
+  output$vis_transfer_dt = renderDT({
+    datatable(
+      transferOverview() %>% 
+        filter(Pos %in% input$vis_transfer_position,
+               Type %in% input$vis_transfer_type) %>% 
+        arrange(-Fee),
+      rownames = F,
+      options = list(
+        scrollY = 200,
+        scrollX = 300,
+        deferRender = TRUE,
+        pageLength = 10,
+        dom = "tip",
+        autoWidth = F
+      )
+    )
+  })
+  
+  output$vis_transfer_rank = renderPlotly({
+    dff = transferOverview() 
+    dff$Fee[which(dff$Type == "Out")] = -dff$Fee[which(dff$Type == "Out")] 
+    dff = dff %>% 
+      filter(Pos %in% input$vis_transfer_position,
+             Type %in% input$vis_transfer_type) %>% 
+      arrange(-abs(Fee)) %>% 
+      head(10)
+    p = ggplot(dff, aes(y = reorder(Name, abs(Fee)), x = Fee)) + 
+      geom_col(aes(fill = Type)) + 
+      theme_minimal() + 
+      labs(y = "Transfer Fee (M)",
+           title = "Transfer Fee in Players")
+    
+    ggplotly(p)
+  })
+  
+  #### Player #### 
+  playerData = reactiveVal(data.frame())
+  observeEvent(input$player_season, {
+    Players = c()
+    for (season in input$player_season) {
+      files = paste0("../data/Season",
+                     season,
+                     "/Season_Start.csv")
+      temp = read.csv(files)
+      Players = c(Players, temp$Name)
+    }
+    
+    updatePickerInput(session, "player_name",
+                      choices = unique(Players),
+                      options = pickerOptions(liveSearch = T))
+  })
+  observe({
+    file_names = c()
+    comps = c()
+    for (season in input$player_season) {
+      for (comp in input$player_comp) {
+        files = list.files(paste0("../data/Season",
+                                  season,
+                                  "/",
+                                  comp,
+                                  "/"),
+                           full.names = T)
+        file_names = c(file_names, files)
+        if (length(files) > 1){
+          comps = c(comps, rep(comp, length(files) - 1))
+        }
+        
+      }
+    }
+    
+    
+    df = data.frame()
+    for (file_name in file_names){
+      if (!str_detect(file_name, "merge")) {
+        temp = read.csv(file_name)
+        df = rbind(df, temp)
+      }
+    }
+    
+    df = df %>% 
+      filter(Name == input$player_name) %>% 
+      mutate(
+        Competition = comps,
+        Shot_Acc = Shot_Comp / Shots * 100,
+        Pass_Acc = Pass_Comp / Pass * 100,
+        Dribble_Acc = Dribble_Comp / Dribble * 100,
+        Tackle_Acc = Tackle_Comp / Tackle * 100)
+    
+    playerData(df)
+
+  })
+  
+  output$player_1 = renderPlotly({
+    plot_player_stat(playerData(), 
+                     get_variable(input$player_variable)[1])
+  })
+  output$player_2 = renderPlotly({
+    plot_player_stat(playerData(), 
+                     get_variable(input$player_variable)[2])
+  })
 }
+
+
+
+
+
+
+
+

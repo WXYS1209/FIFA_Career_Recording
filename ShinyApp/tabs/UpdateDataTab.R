@@ -111,7 +111,7 @@ merge_subtab <-
                   multiple = T),
         actionButton("merge", "Merge Data"),
         actionButton("updateData_merge", 
-                       "Update Merged Aggregated Record")
+                     "Update Merged Aggregated Record")
       ),
       mainPanel(
         DTOutput("updatedData_merge_dt")
@@ -124,8 +124,9 @@ match_stat_subtab <-
     "Match Stat",
     sidebarLayout(
       sidebarPanel(
-        numericInput("match_stat_season", "Season",
-                     value = 1, min = 1, step = 1),
+        pickerInput("match_stat_season", "Season",
+                    choices = 1,
+                    selected = 1),
         fluidRow(
           column(6,
                  pickerInput("match_stat_comp", "Competition",

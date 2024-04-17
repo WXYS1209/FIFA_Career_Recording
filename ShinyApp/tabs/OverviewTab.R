@@ -36,12 +36,6 @@ current_season_subtab <-
           options = pickerOptions(actionsBox = T)
         ),
         pickerInput(
-          "vis_goal_type",
-          "Goal Type",
-          choices = c("GF", "GA", "diff"),
-          multiple = F
-        ),
-        pickerInput(
           "vis_where",
           "H / A",
           choices = c("Home", "Away"),
@@ -52,11 +46,14 @@ current_season_subtab <-
         plotlyOutput("vis_radar"),
       ),
       mainPanel(
+        fluidRow(
         column(6,
                plotlyOutput("vis_1")),
         column(6,
-               plotlyOutput("vis_2")),
-        plotOutput("vis_match")
+               plotlyOutput("vis_2"))
+        ),
+        
+        plotlyOutput("vis_match")
       )
     )
   )

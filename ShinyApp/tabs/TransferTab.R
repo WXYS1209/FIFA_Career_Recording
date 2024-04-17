@@ -10,30 +10,37 @@ add_transfer_subtab <-
           choices = 1:10,
           multiple = F
         ),
-        radioButtons(
+        pickerInput(
           inputId = "transfer_window",
           label = "Window",
           choices = c("Summer", "Winter"),
-          selected = "Summer"
+          selected = "Summer",
+          multiple = F
         ),
-        radioButtons(
-          "transfer_type",
-          "Type",
-          choices = c("In", "Out"),
-          selected = NULL
-        ),
+        radioButtons("transfer_type", "Type", 
+                     choices = c("In", "Out"),
+                     selected = "In"),
         textInput("transfer_name", "Player"),
+        pickerInput(
+          inputId = "transfer_position",
+          label = "Position",
+          choices = c("ST", "CF", "LW", "RW", "CAM",
+                      "LM", "CM", "CDM", "RM",
+                      "LWB", "LB", "CB", "RB", "RWB",
+                      "GK"),
+          multiple = F
+        ),
         numericInput("transfer_fee", "Fee (M)", value = 0, min = 0),
         actionButton("transfer_add", "Add Transfer"),
-        downloadButton("downloadFile_transfer", "Download Transfer Record")
+        actionButton("updateFile_transfer", 
+                     "Update Transfer Record"),
+        actionButton("transfer_undo", "Undo")
       ),
       mainPanel(
-        column(6,
-               h3("In"),
-               DTOutput("transfer_in_dt")),
-        column(6,
-               h3("Out"),
-               DTOutput("transfer_out_dt"))
+        h3("New Transfers"),
+        DTOutput("transfer_dt"),
+        h3("All Transfers"),
+        DTOutput("transfer_overview_dt")
       )
     )
   )
@@ -41,7 +48,7 @@ add_transfer_subtab <-
 
 vis_transfer_subtab <- 
   tabPanel(
-    "Ranking Transfer",
+    "Overview Transfer",
     sidebarLayout(
       sidebarPanel(
         pickerInput(
@@ -52,20 +59,27 @@ vis_transfer_subtab <-
                       "LWB", "LB", "CB", "RB", "RWB",
                       "GK"),
           multiple = T,
-          options = list(`action-button` = T)
+          selected = "ST",
+          options = pickerOptions(actionsBox = T)
         ),
-        radioButtons(
+        pickerInput(
           "vis_transfer_type",
           "Type",
           choices = c("In", "Out"),
-          selected = NULL
+          selected = "In",
+          multiple = T
         )
       ),
       mainPanel(
-        h3("Plot"),
-        plotlyOutput("vis_transfer")
+        h3("Transfer Overview"),
+        dataTableOutput("vis_transfer_dt")
       )
-    )
+    ),
+    fluidRow(
+      column(6, plotlyOutput("vis_transfer_fee")),
+      column(6, plotlyOutput("vis_transfer_rank"))
+      )
+    
   )
 
 transfer_tab <- 
