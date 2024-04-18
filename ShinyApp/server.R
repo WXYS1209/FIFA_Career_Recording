@@ -339,7 +339,8 @@ server = function(input, output, session) {
                Pass_Acc = Pass_Comp / Pass,
                Dribble_Acc = Dribble_Comp / Dribble,
                Tackle_Acc = Tackle_Comp / Tackle,
-               Rating = Rating / Played)
+               Rating = Rating / Played,
+               Distance = Distance / Played)
       
     }
     
@@ -355,32 +356,7 @@ server = function(input, output, session) {
   })
   
   output$vis_radar = renderPlotly({
-    data_radar = season_df() %>% 
-      pivot_longer(!Name & !Pos & !Shot_Comp & !Pass_Comp &
-                     !Dribble_Comp & !Tackle_Comp, 
-                   names_to = "Var", values_to = "value")
-    
-    figr = plot_ly(data_radar, 
-                   type = "scatterpolar",
-                   mode = "lines+markers",
-                   theta = ~Var,
-                   r = ~value,
-                   line = list(shape = "spline"),
-                   marker = list(symbol = "circle"),
-                   hoverinfo = 'text',
-                   text = ~paste('</br> Player: ', Name,
-                                 '</br> Position: ', Pos),
-                   color=~factor(Pos)) %>%
-      layout(
-        polar = list(
-          radialaxis = list(
-            visible = TRUE
-          )
-        ),
-        showlegend = T
-      )
-    
-    figr
+    plot_radar(season_df())
     
   })
   
@@ -662,19 +638,28 @@ server = function(input, output, session) {
   
   #### Player #### 
   playerData = reactiveVal(data.frame())
+  playerPos = reactiveVal(data.frame())
+  
   observeEvent(input$player_season, {
     Players = c()
+    Positions = c()
     for (season in input$player_season) {
       files = paste0("./data/Season",
                      season,
                      "/Season_Start.csv")
       temp = read.csv(files)
       Players = c(Players, temp$Name)
+      Positions = c(Positions, temp$Pos)
     }
     
-    updatePickerInput(session, "player_name",
-                      choices = unique(Players),
-                      options = pickerOptions(liveSearch = T))
+    tempp = data.frame(Players, Positions)
+    tempp = tempp[!duplicated(tempp),]
+    playerPos(tempp)
+    
+    updatePickerInput(session, "player_name_1",
+                      choices = unique(Players))
+    updatePickerInput(session, "player_name_2",
+                      choices = unique(Players))
   })
   
   observe({
@@ -709,24 +694,32 @@ server = function(input, output, session) {
     }
     
     df = df %>% 
-      filter(Name == input$player_name) %>% 
+      filter(Name %in% c(input$player_name_1,
+                         input$player_name_2)) %>% 
       mutate(
         Shot_Acc = Shot_Comp / Shots * 100,
         Pass_Acc = Pass_Comp / Pass * 100,
         Dribble_Acc = Dribble_Comp / Dribble * 100,
         Tackle_Acc = Tackle_Comp / Tackle * 100)
-    
+    df$Pos = playerPos()$Positions[match(df$Name, playerPos()$Players)]
     playerData(df)
-    
+    # write.csv(df, "~/Desktop/aa.csv", row.names = F)
   })
   
   output$player_1 = renderPlotly({
     plot_player_stat(playerData(), 
-                     get_variable(input$player_variable)[1])
+                     input$player_variable,
+                     input$player_name_1)
   })
   output$player_2 = renderPlotly({
     plot_player_stat(playerData(), 
-                     get_variable(input$player_variable)[2])
+                     input$player_variable,
+                     input$player_name_2)
+  })
+  
+  output$player_radar = renderPlotly({
+    plot_radar_player(playerData(),
+                      input$player_variable_radar)
   })
 }
 

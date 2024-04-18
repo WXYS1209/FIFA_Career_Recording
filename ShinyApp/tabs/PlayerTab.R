@@ -6,8 +6,18 @@ player_tab <-
     sidebarLayout(
       sidebarPanel(
         pickerInput(
-          inputId = "player_name",
-          label = "Name",
+          inputId = "player_name_1",
+          label = "Player 1",
+          choices = c("J. Félix", 
+                      "M. Mount",
+                      "K. Havertz"),
+          multiple = F,
+          selected = "J. Félix",
+          options = pickerOptions(liveSearch = T)
+        ),
+        pickerInput(
+          inputId = "player_name_2",
+          label = "Player 2",
           choices = c("J. Félix", 
                       "M. Mount",
                       "K. Havertz"),
@@ -26,17 +36,37 @@ player_tab <-
         pickerInput(
           inputId = "player_variable",
           label = "Stat",
-          choices = c("Goals & Distance",
-                      "Assisting",
-                      "Shooting",
-                      "Passing",
-                      "Dribbling",
-                      "Tackling",
-                      "Possession",
-                      "Rating & Appearance"
+          choices = c("Played", "Started", 
+                      "MOTM", "Goals", 
+                      "Assists", "Shots", 
+                      "Shot_Comp", "Shot_Acc",
+                      "Pass", "Pass_Comp", "Pass_Acc",
+                      "Key_Pass",
+                      "Dribble", "Dribble_Comp", "Dribble_Acc",
+                      "Tackle", "Tackle_Comp", "Tackle_Acc",
+                      "Possession_Won", "Possession_Lost",
+                      "Distance", "Rating"
           ),
           multiple = F,
-          selected = "Goals & Distance"
+          selected = "Goals"
+        ),
+        pickerInput(
+          inputId = "player_variable_radar",
+          label = "Stat for Radar",
+          choices = c("Played", "Started", 
+                      "MOTM", "Goals", 
+                      "Assists", "Shots", 
+                      "Shot_Acc", "Pass", 
+                      "Pass_Acc", "Key_Pass",
+                      "Dribble", "Dribble_Acc", 
+                      "Tackle", "Tackle_Acc", 
+                      "Possession_Won", "Possession_Lost",
+                      "Distance", "Rating"
+          ),
+          multiple = T,
+          selected = "Goals",
+          options = pickerOptions(actionsBox = T,
+                                  liveSearch = T)
         ),
         pickerInput(
           "player_comp",
@@ -45,7 +75,8 @@ player_tab <-
           multiple = T,
           selected = "PL",
           options = pickerOptions(actionsBox = T)
-        )
+        ),
+        plotlyOutput("player_radar")
       ),
       mainPanel(
         plotlyOutput("player_1"),
