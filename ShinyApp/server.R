@@ -1,47 +1,45 @@
 server = function(input, output, session) {
   # Update Seasons
   observe({
-    seasons = list.files("../data/")[grepl("^Season", 
-                                           list.files("../data/"))]
     updatePickerInput(
       session,
       "season",
-      choices = gsub("Season", "", seasons),
+      choices = seasons_global,
       selected = "1"
-      )
+    )
     
     updatePickerInput(
       session,
       "season_merge",
-      choices = c(gsub("Season", "", seasons), "All"),
+      choices = seasons_global,
       selected = "1"
     )
     
     updatePickerInput(
       session,
       "match_stat_season",
-      choices = gsub("Season", "", seasons),
+      choices = seasons_global,
       selected = "1"
     )
     
     updatePickerInput(
       session,
       "vis_season",
-      choices = gsub("Season", "", seasons),
+      choices = seasons_global,
       selected = "1"
     )
     
     updatePickerInput(
       session,
       "transfer_season",
-      choices = gsub("Season", "", seasons),
+      choices = seasons_global,
       selected = "1"
     )
     
     updatePickerInput(
       session,
       "player_season",
-      choices = gsub("Season", "", seasons),
+      choices = seasons_global,
       selected = "1"
     )
   })
@@ -51,7 +49,7 @@ server = function(input, output, session) {
   
   # Read Season_Start.csv for selected season
   observeEvent(input$season, {
-    file_name = paste0("../data/Season",
+    file_name = paste0("./data/Season",
                        input$season,
                        "/Season_Start.csv")
     if (file.exists(file_name)) {
@@ -165,17 +163,17 @@ server = function(input, output, session) {
   
   # Read Aggregated Record
   observe({
-    if (input$competition_merge != "All" & input$season_merge != "All"){
-      file_name = paste0("../data/Season", input$season_merge,
-                         "/", input$competition_merge, "/merged_data_",
-                         input$competition_merge,
-                         ".csv")
-      df = read.csv(file_name)
-      aggregatedData(df)
-    }
-    else {
-      aggregatedData(data.frame())
-    }
+    # if (input$competition_merge != "All" & input$season_merge != "All"){
+    file_name = paste0("./data/Season", input$season_merge,
+                       "/", input$competition_merge, "/merged_data_",
+                       input$competition_merge,
+                       ".csv")
+    df = read.csv(file_name)
+    aggregatedData(df)
+    # }
+    # else {
+    #   aggregatedData(data.frame())
+    # }
     
   })
   
@@ -184,21 +182,8 @@ server = function(input, output, session) {
     temp_aggr = aggregatedData()
     temp_match = newmatchData()
     
-    df = temp_aggr %>% 
-      rbind(temp_match) %>% 
-      group_by(Name) %>% 
-      summarise(
-        Pos = Pos[!is.na(Pos)],
-        across(c(Played, Started, MOTM, 
-                 Goals, Assists, Shots, Shot_Comp, 
-                 Pass, Pass_Comp, Key_Pass, 
-                 Dribble, Dribble_Comp, 
-                 Tackle, Tackle_Comp, 
-                 Possession_Won, Possession_Lost, 
-                 Distance, Rating),
-               ~ sum(.x, na.rm = TRUE))
-      )
-    aggregatedData(df[!duplicated(df),])
+    df = clean_merged_data(rbind(temp_aggr, temp_match))
+    aggregatedData(df)
   })
   
   # Display merged aggregated record
@@ -214,29 +199,31 @@ server = function(input, output, session) {
   
   # Rewrite
   observeEvent(input$updateData_merge, {
-    if (input$competition_merge != "All" &
-        input$season_merge != "All"){
-      write.csv(aggregatedData(), 
-                paste0("../data/Season", input$season_merge,
-                       "/", input$competition_merge, "/merged_data_",
-                       input$competition_merge,
-                       ".csv"),
-                row.names = F
-      )
-    }
-    if (input$competition_merge == "All" & input$season_merge != "All") {
-      write.csv(aggregatedData(), 
-                paste0("../data/Season", input$season_merge,
-                       "/OverAll.csv"),
-                row.names = F
-      )
-    }
-    if (input$season_merge == "All") {
-      write.csv(aggregatedData(), 
-                paste0("../data/OverAllSeasons.csv"),
-                row.names = F
-      )
-    }
+    # if (input$competition_merge != "All" &
+    #     input$season_merge != "All"){
+    write.csv(aggregatedData(), 
+              paste0("./data/Season", input$season_merge,
+                     "/", input$competition_merge, "/merged_data_",
+                     input$competition_merge,
+                     ".csv"),
+              row.names = F
+    )
+    update_current_season(input$season_merge)
+    update_all_seasons()
+    # }
+    # if (input$competition_merge == "All" & input$season_merge != "All") {
+    # write.csv(aggregatedData(), 
+    #           paste0("./data/Season", input$season_merge,
+    #                  "/OverAll.csv"),
+    #           row.names = F
+    # )
+    # }
+    # if (input$season_merge == "All") {
+    # write.csv(aggregatedData(), 
+    #           paste0("./data/OverAllSeasons.csv"),
+    #           row.names = F
+    # )
+    # }
   })
   # output$updateData_merge = downloadHandler(
   #   filename = function() {
@@ -251,7 +238,7 @@ server = function(input, output, session) {
   matchstatData = reactiveValues(dt = data.frame(), history = list(NULL))
   
   observeEvent(input$match_stat_season, {
-    file_name = paste0("../data/Season",
+    file_name = paste0("./data/Season",
                        input$match_stat_season,
                        "/Match_Stat.csv")
     df = read.csv(file_name)
@@ -309,7 +296,7 @@ server = function(input, output, session) {
   # Rewrite
   observeEvent(input$updateMatchStat, {
     write.csv(matchstatData$dt, 
-              paste0("../data/Season",
+              paste0("./data/Season",
                      input$match_stat_season,
                      "/Match_Stat.csv"),
               row.names = F)
@@ -321,29 +308,19 @@ server = function(input, output, session) {
   season_match_df = reactiveVal(data.frame())
   
   observe({
-    if (length(input$vis_comp) == 5){
-      file_name = paste0("../data/Season",
-                         input$vis_season,
-                         "/OverAll.csv")
-      df = read.csv(file_name)  %>% 
-        mutate(Shot_Acc = Shot_Comp / Shots,
-               Pass_Acc = Pass_Comp / Pass,
-               Dribble_Acc = Dribble_Comp / Dribble,
-               Tackle_Acc = Tackle_Comp / Tackle,
-               Rating = Rating / Played)
-    }
-    else if (length(input$vis_comp) == 0){
+    if (length(input$vis_comp) == 0){
       df = data.frame()
     } else{
       file_names = c()
       for (i in 1:length(input$vis_comp)){
-        file_name = paste0("../data/Season",
+        file_name = paste0("./data/Season",
                            input$vis_season,
                            "/", input$vis_comp[i],
                            "/merged_data_", input$vis_comp[i],
                            ".csv")
         file_names = c(file_names, file_name)
       }
+      # print(file_names)
       
       # Read all files
       data_list = lapply(file_names, read.csv)
@@ -355,19 +332,9 @@ server = function(input, output, session) {
         df = data_list[[1]]
       }
       
+      df = clean_merged_data(df)
+      
       df = df %>% 
-        group_by(Name) %>% 
-        summarise(
-          Pos = Pos[!is.na(Pos)],
-          across(c(Played, Started, MOTM, 
-                   Goals, Assists, Shots, Shot_Comp, 
-                   Pass, Pass_Comp, Key_Pass, 
-                   Dribble, Dribble_Comp, 
-                   Tackle, Tackle_Comp, 
-                   Possession_Won, Possession_Lost, 
-                   Distance, Rating),
-                 ~ sum(.x, na.rm = TRUE))
-        )  %>% 
         mutate(Shot_Acc = Shot_Comp / Shots,
                Pass_Acc = Pass_Comp / Pass,
                Dribble_Acc = Dribble_Comp / Dribble,
@@ -376,7 +343,7 @@ server = function(input, output, session) {
       
     }
     
-    file_name_match = paste0("../data/Season",
+    file_name_match = paste0("./data/Season",
                              input$vis_season,
                              "/Match_Stat.csv")
     
@@ -434,14 +401,15 @@ server = function(input, output, session) {
   #### Overall ####
   # overall_df = reactiveVal(data.frame())
   
-  file_name_all = "../data/OverAllSeasons.csv"
+  file_name_all = "./data/OverAllSeasons.csv"
   if (file.exists(file_name_all)) {
     df_all_seasons = read.csv(file_name_all) %>% 
       mutate(Shot_Acc = Shot_Comp / Shots,
              Pass_Acc = Pass_Comp / Pass,
              Dribble_Acc = Dribble_Comp / Dribble,
              Tackle_Acc = Tackle_Comp / Tackle,
-             Rating = Rating / Played)
+             Rating = Rating / Played,
+             Distance = Distance / Played)
   }
   else{
     df_all_seasons = NULL
@@ -557,7 +525,7 @@ server = function(input, output, session) {
   
   #### Transfer #### 
   transferOverview = reactiveVal(data.frame())
-  file_name_trans = "../data/Transfer_Info.csv"
+  file_name_trans = "./data/Transfer_Info.csv"
   if (file.exists(file_name_trans)) {
     df_transfer = read.csv(file_name_trans)
   }
@@ -622,7 +590,7 @@ server = function(input, output, session) {
   observeEvent(input$updateFile_transfer, {
     df_transfer = rbind(transferOverview(), transferData$dt)
     write.csv(df_transfer, 
-              paste0("../data/Transfer_Info.csv"),
+              paste0("./data/Transfer_Info.csv"),
               row.names = F)
     transferOverview(df_transfer)
   })
@@ -697,7 +665,7 @@ server = function(input, output, session) {
   observeEvent(input$player_season, {
     Players = c()
     for (season in input$player_season) {
-      files = paste0("../data/Season",
+      files = paste0("./data/Season",
                      season,
                      "/Season_Start.csv")
       temp = read.csv(files)
@@ -708,12 +676,13 @@ server = function(input, output, session) {
                       choices = unique(Players),
                       options = pickerOptions(liveSearch = T))
   })
+  
   observe({
     file_names = c()
     comps = c()
     for (season in input$player_season) {
       for (comp in input$player_comp) {
-        files = list.files(paste0("../data/Season",
+        files = list.files(paste0("./data/Season",
                                   season,
                                   "/",
                                   comp,
@@ -731,7 +700,10 @@ server = function(input, output, session) {
     df = data.frame()
     for (file_name in file_names){
       if (!str_detect(file_name, "merge")) {
-        temp = read.csv(file_name)
+        temp = read.csv(file_name) %>% 
+          mutate(
+            Competition = 
+              sub(".*match_data_(.*?)_.*", "\\1", file_name))
         df = rbind(df, temp)
       }
     }
@@ -739,14 +711,13 @@ server = function(input, output, session) {
     df = df %>% 
       filter(Name == input$player_name) %>% 
       mutate(
-        Competition = comps,
         Shot_Acc = Shot_Comp / Shots * 100,
         Pass_Acc = Pass_Comp / Pass * 100,
         Dribble_Acc = Dribble_Comp / Dribble * 100,
         Tackle_Acc = Tackle_Comp / Tackle * 100)
     
     playerData(df)
-
+    
   })
   
   output$player_1 = renderPlotly({

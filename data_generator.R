@@ -1,8 +1,8 @@
-if (!dir.exists("./data")) {
-  dir.create("./data")
+if (!dir.exists("./ShinyApp/data")) {
+  dir.create("./ShinyApp/data")
 }
 
-setwd("./data")
+setwd("./ShinyApp/data")
 players = c()
 positions = c()
 df_match <- data.frame(
@@ -52,7 +52,7 @@ write.csv(df_transfer,
           "Transfer_Info.csv",
           row.names = F)
 
-write.csv(df_match,
+write.csv(data.frame(),
           "OverAllSeasons.csv",
           row.names = F)
 
@@ -68,9 +68,10 @@ write.csv(df_match,
                  "/OverAll.csv"),
           row.names = F)
 
+ss = read.csv(paste0("./Season", i, "/Season_Start.csv"))
 for (comp in c("PL", "EC", "CC", "FA", "Other")) {
   dir.create(paste0("Season", i, "/", comp))
-  write.csv(data_df, 
+  write.csv(ss, 
             paste0("Season", i, "/", comp, "/",
                    "merged_data_", comp, ".csv"),
             row.names = F)

@@ -97,12 +97,12 @@ merge_subtab <-
         fluidRow(
           column(6,
                  pickerInput("season_merge", "Select Season",
-                             choices = c(1:10, "All"),
+                             choices = c(1:10),
                              selected = 1)),
           column(6,
                  pickerInput("competition_merge", "Select Competition",
                              choices = c("PL", "EC", "CC", 
-                                         "FA", "Other", "All")))
+                                         "FA", "Other")))
         ),
         # fileInput("fileUpload_main", "Upload Aggregated Record File",
         #           accept = c(".csv")),
