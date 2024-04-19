@@ -1,29 +1,25 @@
-Name,Pos,Played,Started,MOTM,Goals,Assists,Shots,Shot_Comp,Pass,Pass_Comp,Key_Pass,Dribble,Dribble_Comp,Tackle,Tackle_Comp,Possession_Won,Possession_Lost,Distance,Rating
-K. Havertz,CAM,,,,,,,,,,,,,,,,,,
-M. Mount,CAM,,,,,,,,,,,,,,,,,,
-J. Gvardiol,CB,,,,,,,,,,,,,,,,,,
-N. Jackson,ST,,,,,,,,,,,,,,,,,,
-W. Fofana,CB,,,,,,,,,,,,,,,,,,
-T. Chalobah,CB,,,,,,,,,,,,,,,,,,
-B. Badiashile,CB,,,,,,,,,,,,,,,,,,
-A. Christensen,CB,,,,,,,,,,,,,,,,,,
-D. Zakaria,CDM,,,,,,,,,,,,,,,,,,
-J. Félix,CF,,,,,,,,,,,,,,,,,,
-L. Hall,CM,,,,,,,,,,,,,,,,,,
-R. Lavia,CDM,,,,,,,,,,,,,,,,,,
-E. Fernández,CM,,,,,,,,,,,,,,,,,,
-D. Rice,CDM,,,,,,,,,,,,,,,,,,
-C. Gallagher,CM,,,,,,,,,,,,,,,,,,
-É. Mendy,GK,,,,,,,,,,,,,,,,,,
-Kepa,GK,,,,,,,,,,,,,,,,,,
-Cucurella,LB,,,,,,,,,,,,,,,,,,
-R. Sterling,LW,,,,,,,,,,,,,,,,,,
-N. Madueke,RW,,,,,,,,,,,,,,,,,,
-B. Chilwell,LWB,,,,,,,,,,,,,,,,,,
-R. James,RWB,,,,,,,,,,,,,,,,,,
-P. Aubameyang,ST,,,,,,,,,,,,,,,,,,
-A. Broja,ST,,,,,,,,,,,,,,,,,,
-D. Fofana,ST,,,,,,,,,,,,,,,,,,
-M. Gusto,RB,,,,,,,,,,,,,,,,,,
-W. Zaïre-Emery,CM,,,,,,,,,,,,,,,,,,
-A. Elenga,RW,,,,,,,,,,,,,,,,,,
+"Name","Pos","Played","Started","MOTM","Goals","Assists","Shots","Shot_Comp","Pass","Pass_Comp","Key_Pass","Dribble","Dribble_Comp","Tackle","Tackle_Comp","Possession_Won","Possession_Lost","Distance","Rating"
+"Kai Havertz","CAM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Mason Mount","CAM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Joško Gvardiol","CB",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Nicolas Jackson","ST",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Wesley Fofana","CB",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Trevoh Chalobah","CB",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Benoît Badiashile","CB",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Andreas Christensen","CB",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Denis Zakaria","CDM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"João Félix","CF",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Lewis Hall","CM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Romeo Lavia","CDM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Enzo Fernández","CM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Declan Rice","CDM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Conor Gallagher","CM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Édouard Mendy","GK",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Kepa","GK",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Marc Cucurella","LB",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Raheem Sterling","LW",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Ben Chilwell","LWB",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Reece James","RWB",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Armando Broja","ST",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Malo Gusto","RB",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Warren Zaïre-Emery","CM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA

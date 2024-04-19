@@ -5,34 +5,52 @@ player_tab <-
     "Player",
     sidebarLayout(
       sidebarPanel(
-        pickerInput(
-          inputId = "player_name_1",
-          label = "Player 1",
-          choices = c("J. Félix", 
-                      "M. Mount",
-                      "K. Havertz"),
-          multiple = F,
-          selected = "J. Félix",
-          options = pickerOptions(liveSearch = T)
+        fluidRow(
+          column(6,
+                 pickerInput(
+                   "player_season",
+                   "Season",
+                   choices = 1:10,
+                   selected = 1,
+                   multiple = T,
+                   options = pickerOptions(actionsBox = T)
+                 )),
+          column(6,
+                 pickerInput(
+                   "player_comp",
+                   "Competition",
+                   choices = c("PL", "EC", "CC", "FA", "Other"),
+                   multiple = T,
+                   selected = "PL",
+                   options = pickerOptions(actionsBox = T)
+                 ))
         ),
-        pickerInput(
-          inputId = "player_name_2",
-          label = "Player 2",
-          choices = c("J. Félix", 
-                      "M. Mount",
-                      "K. Havertz"),
-          multiple = F,
-          selected = "J. Félix",
-          options = pickerOptions(liveSearch = T)
+        
+        fluidRow(
+          column(6,
+                 pickerInput(
+                   inputId = "player_name_1",
+                   label = "Player 1",
+                   choices = c("J. Félix", 
+                               "M. Mount",
+                               "K. Havertz"),
+                   multiple = F,
+                   selected = "J. Félix",
+                   options = pickerOptions(liveSearch = T)
+                 )),
+          column(6,
+                 pickerInput(
+                   inputId = "player_name_2",
+                   label = "Player 2",
+                   choices = c("J. Félix", 
+                               "M. Mount",
+                               "K. Havertz"),
+                   multiple = F,
+                   selected = "J. Félix",
+                   options = pickerOptions(liveSearch = T)
+                 ))
         ),
-        pickerInput(
-          "player_season",
-          "Season",
-          choices = 1:10,
-          selected = 1,
-          multiple = T,
-          options = pickerOptions(actionsBox = T)
-        ),
+
         pickerInput(
           inputId = "player_variable",
           label = "Stat",
@@ -48,7 +66,8 @@ player_tab <-
                       "Distance", "Rating"
           ),
           multiple = F,
-          selected = "Goals"
+          selected = "Goals",
+          options = pickerOptions(liveSearch = T)
         ),
         pickerInput(
           inputId = "player_variable_radar",
@@ -68,20 +87,25 @@ player_tab <-
           options = pickerOptions(actionsBox = T,
                                   liveSearch = T)
         ),
-        pickerInput(
-          "player_comp",
-          "Competition",
-          choices = c("PL", "EC", "CC", "FA", "Other"),
-          multiple = T,
-          selected = "PL",
-          options = pickerOptions(actionsBox = T)
-        ),
         plotlyOutput("player_radar")
       ),
       mainPanel(
-        plotlyOutput("player_1"),
-        plotlyOutput("player_2")
+        fluidRow(
+          column(3,
+                 uiOutput("player_1_image")),
+          column(9,
+                 plotlyOutput("player_1"))
+        ),
+        fluidRow(
+          column(3,
+                 uiOutput("player_2_image")),
+          column(9,
+                 plotlyOutput("player_2"))
+        ),
         
+        
+        # plotlyOutput("player_2")
+        # imageOutput("player_1_image")
         # plotlyOutput("vis_match")
       )
     )

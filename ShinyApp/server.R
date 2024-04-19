@@ -179,8 +179,8 @@ server = function(input, output, session) {
   
   # Merge and update aggregated record
   observeEvent(input$merge, {
-    temp_aggr = aggregatedData()
-    temp_match = newmatchData()
+    temp_aggr = aggregatedData() # merged_data
+    temp_match = newmatchData() # match_data
     
     df = clean_merged_data(rbind(temp_aggr, temp_match))
     aggregatedData(df)
@@ -658,9 +658,13 @@ server = function(input, output, session) {
     
     updatePickerInput(session, "player_name_1",
                       choices = unique(Players))
-    updatePickerInput(session, "player_name_2",
-                      choices = unique(Players))
+    observeEvent(input$player_name_1, {
+      updatePickerInput(session, "player_name_2",
+                        choices = unique(Players)[-which(Players == input$player_name_1)])
+    })
   })
+  
+  
   
   observe({
     file_names = c()
@@ -704,6 +708,22 @@ server = function(input, output, session) {
     df$Pos = playerPos()$Positions[match(df$Name, playerPos()$Players)]
     playerData(df)
     # write.csv(df, "~/Desktop/aa.csv", row.names = F)
+  })
+  
+  output$player_1_image = renderUI({
+    imagePath <- metadata$image[match(input$player_name_1, metadata$name)]
+    # imagePath = "https://cdn.sofifa.net/players/235/790/24_120.png"
+    div(id = "myImage1",
+        tags$img(src = imagePath, width = 200, height = 200)
+    )
+  })
+  
+  output$player_2_image = renderUI({
+    imagePath <- metadata$image[match(input$player_name_2, metadata$name)]
+    # imagePath = "https://cdn.sofifa.net/players/235/790/24_120.png"
+    div(id = "myImage2",
+        tags$img(src = imagePath, width = 200, height = 200)
+    )
   })
   
   output$player_1 = renderPlotly({

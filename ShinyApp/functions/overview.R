@@ -83,10 +83,14 @@ plot_match_stat = function(df, competition, where) {
       geom_line(data = df,
                 aes(x = game, y = Possession / 10),
                 color = "royalblue") +
+      geom_point(data = df,
+                 aes(x = game, y = Possession / 10,
+                     color = Competition)) +
       ylim(0, 10) +
-      labs(x = "Game Number",
-           y = "Goals") +
+      labs(x = "Games Played",
+           y = "") +
       scale_alpha_manual(values = c("W" = 1, "L" = 0.5, "D" = 0.75)) + 
+      scale_color_manual(values = competition_colors) +
       theme_minimal()
     ggplotly(p1)
     # p1

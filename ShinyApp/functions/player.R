@@ -13,9 +13,12 @@ plot_player_stat = function(df, variable, player){
     p = df %>% 
       ggplot(aes(x = 1:dim(df)[1], y = !!variable)) + 
       geom_line(aes(color = Pos)) +
-      geom_col(aes(fill = Competition)) +
+      geom_col(aes(fill = Competition), alpha = 0.5) +
+      scale_fill_manual(values = competition_colors) + 
+      scale_color_manual(values = positions_colors) + 
       ylim(0, NA) + 
       labs(y = "",
+           x = "Games Played",
            title = paste0(variable, " for ", player)) +
       theme_minimal()
     ggplotly(p)
@@ -47,7 +50,9 @@ plot_radar_player = function(df, variables) {
   
   figr = plot_ly(data_radar, 
                  type = "scatterpolar",
-                 mode = "lines+markers",
+                 mode = "lines+markers+fill",
+                 fill = "toself",
+                 # fillcolor = ~I(sapply(colors, function(x) paste0(x, "40"))),
                  theta = ~Var,
                  r = ~value,
                  line = list(shape = "spline"),
@@ -55,7 +60,8 @@ plot_radar_player = function(df, variables) {
                  hoverinfo = 'text',
                  text = ~paste('</br> Player: ', Name,
                                '</br> Position: ', Pos),
-                 color=~factor(Name)) %>%
+                 color=~factor(Name),
+                 colors = c("royalblue", "tomato")) %>%
     layout(
       polar = list(
         radialaxis = list(

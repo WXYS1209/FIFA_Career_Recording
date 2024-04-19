@@ -1,7 +1,7 @@
 clean_merged_data = function(df) {
   df = df %>% 
     group_by(Name) %>% 
-    summarise(
+    reframe(
       Pos = Pos[!is.na(Pos)],
       across(c(Played, Started, MOTM, 
                Goals, Assists, Shots, Shot_Comp, 

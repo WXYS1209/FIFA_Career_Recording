@@ -5,7 +5,7 @@ account: wxys1209
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 11782239
-bundleId: 8504315
+bundleId: 8509309
 url: https://wxys1209.shinyapps.io/FIFA_Career_Tracker/
 version: 1
 asMultiple: FALSE
